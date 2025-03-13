@@ -1,17 +1,21 @@
-//visualisation de l'IMAGE
-document.getElementById('fileInput').addEventListener('change', function(event) {
-    const file = event.target.files[0]; // Récupérer le fichier sélectionné
-    const reader = new FileReader(); // Créer un nouvel objet FileReader
+// Gestion du menu mobile
+document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+    this.classList.toggle('active');
+    document.querySelector('.nav-menu').classList.toggle('active');
+});
 
-    // Lorsque le fichier est chargé
+// Amélioration de la prévisualisation de l'image
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
     reader.onload = function(e) {
-        const previewContainer = document.getElementById('imagePreview'); // Obtenir le conteneur de prévisualisation
-        // Afficher l'image dans le conteneur de prévisualisation
-        previewContainer.innerHTML = '<img src="' + e.target.result + '" alt="Image Preview">';
+        const previewContainer = document.getElementById('imagePreview');
+        previewContainer.innerHTML = '<img src="' + e.target.result + '" alt="Image Preview" style="max-width: 100%; max-height: 200px; border-radius: 10px;">';
     };
     
     if (file) {
-        reader.readAsDataURL(file); // Lire le fichier en tant qu'URL de données
+        reader.readAsDataURL(file);
     }
 });
 
@@ -31,16 +35,14 @@ const citations = [
 // Fonction pour générer une citation aléatoire
 function getRandomCitation() {
     const index = Math.floor(Math.random() * citations.length);
-    return `"${citations[index]}"`;  // Ajout des guillemets
+    return citations[index];
 }
-
 
 // Fonction pour générer l'image avec le texte
 function generateImage() {
     const fileInput = document.getElementById('fileInput');
     const nameInput = document.getElementById('nameInput').value;
-    const fontFamily = "Montserrat";  // Police Montserrat
-    const textColor = document.getElementById('colorSelector').value;
+    const fontFamily = "Montserrat, sans-serif";
     const file = fileInput.files[0];
     
     if (!file) {
@@ -56,68 +58,145 @@ function generateImage() {
     const reader = new FileReader();
     
     reader.onload = function(e) {
-        // Afficher l'image et le texte dans le conteneur de résultat
         const resultContainer = document.getElementById('resultContainer');
-        const citation = getRandomCitation();
-        resultContainer.innerHTML = `
-            <div class="text-overlay">
-                <span class="name">${nameInput}</span>
-                <div class="citation">${citation}</div>
-            </div>
-        `;
+        resultContainer.innerHTML = '';
         
-        // Appliquer le style de police et la couleur choisis
-        const textOverlay = resultContainer.querySelector('.text-overlay');
-        textOverlay.style.fontFamily = fontFamily;
-        textOverlay.style.color = textColor;
-        
-        // Créer un canvas pour dessiner l'image et le texte
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         const img = new Image();
         
         img.onload = function() {
-            // Définir les dimensions du canvas
-            canvas.width = img.width;
-            canvas.height = img.height;
+            const canvasSize = 700;
+            canvas.width = canvasSize;
+            canvas.height = canvasSize;
+            
+            // Fond dégradé
+            const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, "#360820"); 
+            gradient.addColorStop(1, "#210514");  
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Ajouter un motif décoratif 
+            context.save();
+            context.globalAlpha = 0.05;
+            for (let i = 0; i < canvas.width; i += 40) {
+                for (let j = 0; j < canvas.height; j += 40) {
+                    context.beginPath();
+                    context.arc(i, j, 5, 0, Math.PI * 2);
+                    context.fillStyle = "#FFFFFF";
+                    context.fill();
+                }
+            }
+            context.restore();
+            
+            // Badge décoratif en haut 
+            context.beginPath();
+            context.moveTo(canvas.width / 2 - 150, 20); 
+            context.lineTo(canvas.width / 2 + 150, 20);
+            context.lineTo(canvas.width / 2 + 170, 40);
+            context.lineTo(canvas.width / 2 - 170, 40);
+            context.closePath();
+            context.fillStyle = "#E9C46A";
+            context.fill();
+            
+            // Texte du badge 
+            context.font = 'bold 12px ' + fontFamily; 
+            context.fillStyle = '#360820';
+            context.textAlign = 'center';
+            context.fillText("JOURNÉE INTERNATIONALE DES FEMMES", canvas.width / 2, 34);
+            
+            // Masque circulaire pour la photo 
+            const imgSize = 230; 
+            const imgX = (canvas.width - imgSize) / 2;
+            const imgY = 70; // Déplacé plus haut
+            
+            // Bordure externe 
+            context.beginPath();
+            context.arc(canvas.width / 2, imgY + imgSize / 2, imgSize / 2 + 10, 0, Math.PI * 2); 
+            context.fillStyle = "#E9C46A";
+            context.fill();
+            
+            // Bordure interne
+            context.beginPath();
+            context.arc(canvas.width / 2, imgY + imgSize / 2, imgSize / 2 + 5, 0, Math.PI * 2); 
+            context.fillStyle = "#360820";
+            context.fill();
             
             // Dessiner l'image
-            context.drawImage(img, 0, 0);
+            context.save();
+            context.beginPath();
+            context.arc(canvas.width / 2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2);
+            context.closePath();
+            context.clip();
             
-            // Créer un dégradé pour le fond du texte
-            const gradient = context.createLinearGradient(0, img.height - 150, 0, img.height);
-            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+            // Optimiser l'affichage de l'image
+            const aspectRatio = img.width / img.height;
+            let drawWidth, drawHeight, offsetX, offsetY;
             
-            context.fillStyle = gradient;
-            context.fillRect(0, img.height - 150, img.width, 150);
+            if (aspectRatio > 1) {
+                drawHeight = imgSize;
+                drawWidth = drawHeight * aspectRatio;
+                offsetX = (drawWidth - imgSize) / -2;
+                offsetY = 0;
+            } else {
+                drawWidth = imgSize;
+                drawHeight = drawWidth / aspectRatio;
+                offsetX = 0;
+                offsetY = (drawHeight - imgSize) / -2;
+            }
             
-            // Configurer le style de police
-            context.font = `bold 30px ${fontFamily}`;
-            context.fillStyle = textColor;
-            context.textBaseline = 'top';
+            context.drawImage(img, imgX + offsetX, imgY + offsetY, drawWidth, drawHeight);
+            context.restore();
             
-            // Dessiner le nom
-            context.fillText(nameInput, 20, img.height - 130);
+             // Ajouter un ruban décoratif
+             context.beginPath();
+             context.moveTo(canvas.width / 2 - 150, imgY + imgSize + 20);
+             context.lineTo(canvas.width / 2 + 150, imgY + imgSize + 20);
+             context.lineTo(canvas.width / 2 + 170, imgY + imgSize + 40);
+             context.lineTo(canvas.width / 2 - 170, imgY + imgSize + 40);
+             context.closePath();
+             context.fillStyle = "#E9C46A";
+             context.fill();
             
-            // Configurer le style pour la citation
-            context.font = `20px ${fontFamily}`;
+            // Texte du nom 
+            context.shadowColor = "rgba(0, 0, 0, 0.7)";
+            context.shadowBlur = 5; 
+            context.shadowOffsetY = 2; 
+            context.font = 'bold 32px ' + fontFamily; 
+            context.fillStyle = '#FFFFFF';
+            context.textAlign = 'center';
+            context.fillText(nameInput, canvas.width / 2, imgY + imgSize + 40);
+            context.shadowBlur = 0;
+            context.shadowOffsetY = 0;
+            
+            // Créer un fond semi-transparent pour la citation 
+            const citationY = imgY + imgSize + 120; // Déplacé plus haut
+            context.fillStyle = "rgba(0, 0, 0, 0.3)";
+            context.fillRect(50, citationY - 25, canvas.width - 100, 140); 
+            context.strokeStyle = "#E9C46A";
+            context.lineWidth = 1.5; 
+            context.strokeRect(50, citationY - 25, canvas.width - 100, 140);
+            
+            // Citation avec meilleure lisibilité 
+            const citation = getRandomCitation();
+            context.font = 'italic 18px Georgia, serif';
+            context.fillStyle = 'white';
             
             // Fonction pour dessiner du texte avec retour à la ligne
             function wrapText(context, text, x, y, maxWidth, lineHeight) {
                 const words = text.split(' ');
                 let line = '';
                 let testLine = '';
-                let lineArray = [];
-
+                let lines = [];
+                
                 for (let n = 0; n < words.length; n++) {
                     testLine += words[n] + ' ';
                     const metrics = context.measureText(testLine);
                     const testWidth = metrics.width;
                     
                     if (testWidth > maxWidth && n > 0) {
-                        lineArray.push([line, x, y]);
-                        y += lineHeight;
+                        lines.push(line);
                         line = words[n] + ' ';
                         testLine = words[n] + ' ';
                     } else {
@@ -125,18 +204,61 @@ function generateImage() {
                     }
                 }
                 
-                lineArray.push([line, x, y]);
+                lines.push(line);
                 
-                for (let i = 0; i < lineArray.length; i++) {
-                    context.fillText(lineArray[i][0], lineArray[i][1], lineArray[i][2]);
+                // Centrer verticalement le texte
+                const totalTextHeight = lines.length * lineHeight;
+                let currentY = y - totalTextHeight / 2 + lineHeight / 2;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    context.fillText(lines[i], x, currentY);
+                    currentY += lineHeight;
                 }
+                
+                return currentY;
             }
             
             // Dessiner la citation avec retour à la ligne
-            wrapText(context, `"${citation}"`, 20, img.height - 80, img.width - 40, 25);  // Ajout des guillemets ici aussi
-
+            context.textAlign = 'center';
+            wrapText(context, `"${citation}"`, canvas.width / 2, citationY + 45, canvas.width - 150, 28); // Réduit l'espacement entre les lignes
             
-            // Mettre à jour le lien de téléchargement
+            // Ajouter un badge en bas 
+            const badgeY = imgY + imgSize + 300; 
+            
+            // Créer un cercle avec effet 3D 
+            const grd = context.createRadialGradient(
+                canvas.width / 2, badgeY, 8,
+                canvas.width / 2, badgeY, 40
+            );
+            grd.addColorStop(0, "#F0D78C");
+            grd.addColorStop(1, "#E9C46A");
+            
+            context.beginPath();
+            context.arc(canvas.width / 2, badgeY, 40, 0, Math.PI * 2); 
+            context.fillStyle = grd;
+            context.fill();
+            
+            // Ajouter une bordure au cercle
+            context.beginPath();
+            context.arc(canvas.width / 2, badgeY, 40, 0, Math.PI * 2);
+            context.lineWidth = 2; 
+            context.strokeStyle = '#FFFFFF';
+            context.stroke();
+            
+            // Texte dans le badge 
+            context.font = 'bold 14px ' + fontFamily; 
+            context.fillStyle = '#360820';
+            context.textAlign = 'center';
+            context.fillText("8", canvas.width / 2, badgeY - 5);
+            context.fillText("MARS", canvas.width / 2, badgeY + 15);
+            
+            // Ajouter une signature ou un watermark discret 
+            context.font = '9px ' + fontFamily; 
+            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            context.fillText("E2C-Webmaster SINEMATIALI", canvas.width - 80, canvas.height - 15);
+            
+            // Affichage et téléchargement
+            resultContainer.innerHTML = '<img src="' + canvas.toDataURL('image/png') + '" alt="Carte générée" style="max-width: 100%; height: auto;">';
             const downloadLink = document.getElementById('downloadLink');
             downloadLink.href = canvas.toDataURL('image/png');
             
@@ -155,68 +277,14 @@ function generateImage() {
 
 document.getElementById('generer').addEventListener('click', function() {
     document.querySelector('.regenerer').style.display = "block";
-    const fileInput = document.getElementById('fileInput');
-    const nameInput = document.getElementById('nameInput').value;
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        const resultContainer = document.getElementById('resultContainer');
-        resultContainer.innerHTML = '';
-        
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        const img = new Image();
-        
-        img.onload = function() {
-            const canvasSize = 600;
-            canvas.width = canvasSize;
-            canvas.height = canvasSize;
-            
-            // Fond dégradé élégant avec les couleurs spécifiées
-            const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, "#360820"); 
-            gradient.addColorStop(1, "#210514");  
-            context.fillStyle = gradient;
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Masque circulaire pour la photo
-            const imgSize = 280;
-            const imgX = (canvas.width - imgSize) / 2;
-            const imgY = 70;
-            context.save();
-            context.beginPath();
-            context.arc(canvas.width / 2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2);
-            context.closePath();
-            context.clip();
-            context.drawImage(img, imgX, imgY, imgSize, imgSize);
-            context.restore();
-            
-            // Texte du nom avec la couleur --secondary-color
-            context.font = 'bold 40px Montserrat';
-            context.fillStyle = '#E9C46A';  
-            context.textAlign = 'center';
-            context.fillText(nameInput, canvas.width / 2, imgY + imgSize + 70);
-            
-            // Citation aléatoire avec la couleur blanche
-            context.font = "Georgia, 'Times New Roman', Times, serif"
-            context.fillStyle = 'white';
-            context.fillText(getRandomCitation(), canvas.width / 2, imgY + imgSize + 120, canvas.width - 60);
-            
-            // Affichage et téléchargement
-            resultContainer.appendChild(canvas);
-            const downloadLink = document.getElementById('downloadLink');
-            downloadLink.href = canvas.toDataURL('image/png');
-        };
-        
-        img.src = e.target.result;
-    };
-    
-    if (file) {
-        reader.readAsDataURL(file);
-    }
+    generateImage();
 });
 
 document.getElementById('Regenerer').addEventListener('click', function() {
     generateImage();
+});
+
+// Fonctionnalité pour faciliter la sélection de fichier
+document.getElementById('fileButton').addEventListener('click', function() {
+    document.getElementById('fileInput').click();
 });

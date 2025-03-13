@@ -3,80 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carte Journée de la Femme</title>
-  <link rel="stylesheet" href="dp.css">
-  <link rel="stylesheet" href="./home.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <link rel="icon" href="./images/armoirie.png" type="image/png">
+    <meta name="description" content="Générateur de cartes personnalisées pour célébrer la Journée de la Femme - Projet E2C-TIC">
+    <title>Générateur de Cartes - Journée de la Femme | E2C-TIC</title>
+    <link rel="stylesheet" href="dp.css">
+    <link rel="stylesheet" href="./home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" href="./images/armoirie.png" type="image/png">
 </head>
 <body>
     <header class="header">
         <div class="container">      
-            <nav class="main-nav">
+            <nav class="main-nav" aria-label="Navigation principale">
                 <div class="logo-container">
-                    <a href="#Accueil">
-                        <img src="./images/armoirie.png" alt="Logo E2C" class="nav-logo">
+                    <a href="home.html" aria-label="Accueil E2C">
+                        <img src="./images/armoirie.png" alt="Logo E2C" class="nav-logo" width="60" height="60">
                     </a>
                 </div>
-                <button class="mobile-menu-toggle" aria-label="Menu principal">
+                <button class="mobile-menu-toggle" aria-label="Menu principal" aria-expanded="false" aria-controls="nav-menu">
                     <span class="bar"></span>
                     <span class="bar"></span>
                     <span class="bar"></span>
                 </button>
-                <ul class="nav-menu">
+                <ul class="nav-menu" id="nav-menu">
                     <li><a href="home.html" class="nav-link">Accueil</a></li>
-                    <li><a href="#" class="nav-link">Générateur</a></li>
+                    <li><a href="./display_generator.html" class="nav-link" aria-current="page">Générateur</a></li>
                     <li><a href="https://daip.ci/tic/recrutement" class="nav-link">À Propos</a></li>
                 </ul>
             </nav> 
             <div class="logo">
-                <img src="./images/e2cmagg.png" alt="Logo E2C Femmes Inspirantes">
+                <img src="./images/e2cmagg.png" alt="Logo E2C Femmes Inspirantes" width="300" height="100">
             </div>
         </div>
     </header>
 
-    <div class="form">
-        <h1>Il n'y a rien de plus précieux que la vie.<br>Femme, c'est toi qui donne la vie.<br>Tu es un trésor.</h1>
-        <div class="image">
-            <div class="imagEntre">
-                <h2>Femme de valeur, créez votre carte personnalisée</h2>
-                <div class="upload-container">
-                    <!-- Conteneur pour la prévisualisation de l'image -->
-                    <div id="imagePreview">Aperçu de votre image</div>
-                    
-                    <!-- Amélioré: Champ d'entrée de fichier stylisé -->
-                    <div class="file-input-wrapper">
-                        <button class="btn">Choisir une photo</button>
-                        <input type="file" id="fileInput" accept="image/*">
+    <main>
+        <section class="form">
+            <h1>Il n'y a rien de plus précieux que la vie.<br>Femme, c'est toi qui donne la vie.<br>Tu es un trésor.</h1>
+            
+            <div class="image">
+                <div class="imagEntre">
+                    <h2>Femme de valeur, créez votre carte personnalisée</h2>
+                    <div class="upload-container">
+                        <!-- Conteneur pour la prévisualisation de l'image -->
+                        <div id="imagePreview" role="img" aria-label="Aperçu de votre image">Aperçu de votre image</div>
+                        
+                        <!-- Champ d'entrée de fichier stylisé -->
+                        <div class="file-input-wrapper">
+                            <button type="button" class="btn" id="fileButton">Choisir une photo</button>
+                            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif" aria-label="Sélectionner une photo">
+                        </div>
+                        
+                        <label for="nameInput" class="visually-hidden">Votre nom</label>
+                        <input type="text" id="nameInput" placeholder="Entrez votre nom" aria-label="Entrez votre nom">
                     </div>
                     
-                    <input type="text" id="nameInput" placeholder="Entrez votre nom">
-                
+                    <div class="boutton">
+                        <button id="generer" type="button" class="btn">GÉNÉRER</button>
+                        <button id="Regenerer" type="button" class="btn" style="display: none;">NOUVELLE CITATION</button>
+                    </div>
                 </div>
                 
-                <div class="boutton">
-                    <button id="generer" class="btn">GÉNÉRER</button>
-                    <button id="Regenerer" class="btn" style="display: none;">NOUVELLE CITATION</button>
-                </div>
-            </div>
-            
-            <!-- Résultat de la génération -->
-            <div class="regenerer" >
-                <div id="resultContainer"></div>
-                
-                <div class="download-container">
-                    <a id="downloadLink" download="journee_de_la_femme.png" class="btn">Télécharger la carte</a>
+                <!-- Résultat de la génération -->
+                <div class="regenerer">
+                    <div id="resultContainer" role="region" aria-live="polite" aria-label="Carte générée"></div>
+                    
+                    <div class="download-container">
+                        <a id="downloadLink" download="journee_de_la_femme.png" class="btn" role="button" aria-label="Télécharger la carte générée">Télécharger la carte</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
+
     <footer id="contact">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-info">
-                    <img src="./images/e2cmagg.png" alt="Logo E2C" class="footer-logo">
+                    <img src="./images/e2cmagg.png" alt="Logo E2C" class="footer-logo" width="200" height="70">
                     <p>💜 Célébrons les femmes ensemble ! ✨</p>
                     <p>Projet développé par la 1ère promotion Webmaster de <strong>SINEMATIALI</strong> du projet E2C-TIC Session 2024-2025</p>
                 </div>
@@ -84,17 +89,17 @@
                     <h3>Liens rapides</h3>
                     <ul>
                         <li><a href="./home.html">Accueil</a></li>
-                        <li><a href="./display_generator.html">Générateur de badge</a></li>
+                        <li><a href="./display_generator.html">Générateur de carte</a></li>
                         <li><a href="https://daip.ci/tic/recrutement">À propos du projet</a></li>
                     </ul>
                 </div>
                 <div class="footer-social">
                     <h3>Suivez-nous</h3>
                     <div class="social-links">
-                        <a href="#" aria-label="Facebook" class="social-icon">
+                        <a href="#" aria-label="Suivez-nous sur Facebook" class="social-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                         </a>
-                        <a href="#" aria-label="Instagram" class="social-icon">
+                        <a href="#" aria-label="Suivez-nous sur Instagram" class="social-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                         </a>
                     </div>
